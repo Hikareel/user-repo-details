@@ -78,9 +78,9 @@ class GitHubService {
 
     fun getUserAgentHeader(): HttpHeaders {
         val headers = HttpHeaders()
-        headers.add("User-Agent", "https://api.github.com/users/Hikareel")
+        headers.add("User-Agent", "YOUR_GH_NAME")
         headers.add("Accept", "application/vnd.github+json")
-        headers.add("Authorization","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")
+        headers.add("Authorization","YOUR_GH_TOKEN")
         return headers
     }
 }
