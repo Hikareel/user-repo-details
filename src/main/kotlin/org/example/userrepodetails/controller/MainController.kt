@@ -1,17 +1,20 @@
 package org.example.userrepodetails.controller
 
 import org.example.userrepodetails.service.GitHubService
-import org.springframework.stereotype.Controller
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.RestController
 
-@Controller
+@RestController
 class MainController(
     val gitHubService: GitHubService
 ) {
 
     @GetMapping("/repos")
-    fun repos(@RequestParam username: String): Any {
+    @ResponseBody
+    fun repos(@RequestParam username: String): ResponseEntity<Any> {
         return gitHubService.getUserData(username)
     }
 }

@@ -1,19 +1,21 @@
 package org.example.userrepodetails.service
 
 import org.example.userrepodetails.entity.Branch
+import org.example.userrepodetails.entity.Message
 import org.example.userrepodetails.entity.Repository
 import org.example.userrepodetails.entity.UserData
 import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.util.LinkedHashMap
 
 @Service
 class GitHubService {
-    fun getUserData(username: String): Any {
-        if(!checkUserExists(username)){
-            return ResponseEntity.notFound()
+    fun getUserData(username: String): ResponseEntity<Any> {
+        val res = checkUserExists(username)
+        if(res != null){
+            return ResponseEntity.ok(res)
         }
         val user = UserData()
         user.user_login = username
@@ -60,26 +62,18 @@ class GitHubService {
         return branchList
     }
 
-    fun checkUserExists(username: String): Boolean {
-        try {
-            val response = RestTemplate().exchange(
-                "https://api.github.com/users/$username",
-                HttpMethod.GET,
-                getRequestEntity(),
-                String::class.java
-            )
-            return true
-//            val response = WebClient.create().get()
-//                .uri("https://api.github.com/users/$username")
-//                .headers { getUserAgentHeader() }
-
-        } catch (error: Exception){
-            return false
+    fun checkUserExists(username: String): Message? {
+        return try {
+            val response = WebClient.create().get()
+                .uri("https://api.github.com/users/$username")
+                .headers { getUserAgentHeader() }
+                .retrieve()
+                .toBodilessEntity()
+                .block()
+            null
+        } catch (ex: WebClientResponseException.NotFound){
+            Message("404 Code", "User not found")
         }
-    }
-
-    fun getRequestEntity(): HttpEntity<String> {
-        return HttpEntity<String>(getUserAgentHeader())
     }
 
     fun getUserAgentHeader(): HttpHeaders {
