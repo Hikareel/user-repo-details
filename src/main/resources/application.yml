@@ -1,0 +1,4 @@
+git:
+    url: "https://api.github.com"
+    agent: "YOUR_GH_NAME"
+    token: "YOUR_GH_TOKEN"
