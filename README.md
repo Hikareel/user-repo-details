@@ -3,6 +3,13 @@ ___
 If given proper GitHub username it returns names of
 user repositories, names of branches and SHA of last commit in that branch.
 
+### After download
+Before you run program u have to pass your name ang GitHub authorization token.  
+In [application.yml](src/main/resources/application.yml), you have to replace:
+- "YOUR_GH_NAME" with your actual username
+- "YOUR_GH_TOKEN" with your actual personal authorisation token
+
+
 ### Accepted Request Body
 After program run we can use for example Postman to send GET request
 with Key: "username" and Value "GH_NAME", where GH_NAME is name of user
