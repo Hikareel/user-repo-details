@@ -1,5 +1,6 @@
 package org.example.userrepodetails.service
 
+import org.example.userrepodetails.config.ApiConfiguration
 import org.example.userrepodetails.entity.Branch
 import org.example.userrepodetails.entity.Message
 import org.example.userrepodetails.entity.Repository
@@ -11,22 +12,24 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.util.LinkedHashMap
 
 @Service
-class GitHubService {
+class GitHubService(
+    val apiConfiguration: ApiConfiguration
+) {
     fun getUserData(username: String): ResponseEntity<Any> {
         val res = checkUserExists(username)
         if(res != null){
             return ResponseEntity.ok(res)
         }
-        val user = UserData()
-        user.user_login = username
-        user.repositories = getReposData(username)
-        return ResponseEntity.ok(user)
+        return ResponseEntity.ok(UserData(
+            username,
+            getReposData(username)
+        ))
     }
 
     fun getReposData(username: String): List<Repository> {
-        var repoList: MutableList<Repository> = mutableListOf()
+        val repoList: MutableList<Repository> = mutableListOf()
         val response = WebClient.create().get()
-            .uri("https://api.github.com/users/$username/repos")
+            .uri("${apiConfiguration.url}/users/$username/repos")
             .headers { getUserAgentHeader() }
             .retrieve()
             .bodyToMono(List::class.java)
@@ -34,38 +37,38 @@ class GitHubService {
         response?.forEach{
             val responseMap = (it as LinkedHashMap<String, String>)
             if (responseMap["fork"].toString() == "false"){
-                val repository = Repository()
-                repository.rp_name = responseMap["name"]
-                repository.branches = responseMap["name"]?.let { it1 -> getRepoBranchesData(username, it1) }
-                repoList.add(repository)
+                repoList.add(Repository(
+                    responseMap["name"]!!,
+                    responseMap["name"]?.let { it1 -> getRepoBranchesData(username, it1) }!!
+                ))
             }
         }
         return repoList
     }
 
     fun getRepoBranchesData(username: String, repoName: String): List<Branch>{
-        var branchList: MutableList<Branch> = mutableListOf()
+        val branchList: MutableList<Branch> = mutableListOf()
         val response = WebClient.create().get()
-            .uri("https://api.github.com/repos/$username/$repoName/branches")
+            .uri("${apiConfiguration.url}/repos/$username/$repoName/branches")
             .headers { getUserAgentHeader() }
             .retrieve()
             .bodyToMono(List::class.java)
             .block()
         response?.forEach {
             val responseMap = (it as LinkedHashMap<String, String>)
-            val branch = Branch()
-            branch.br_name = responseMap["name"]
             val commit = (responseMap["commit"] as LinkedHashMap<String, String>)
-            branch.last_commit_sha = commit["sha"]
-            branchList.add(branch)
+            branchList.add(Branch(
+                responseMap["name"]!!,
+                commit["sha"]!!
+            ))
         }
         return branchList
     }
 
     fun checkUserExists(username: String): Message? {
         return try {
-            val response = WebClient.create().get()
-                .uri("https://api.github.com/users/$username")
+            WebClient.create().get()
+                .uri("${apiConfiguration.url}/users/$username")
                 .headers { getUserAgentHeader() }
                 .retrieve()
                 .toBodilessEntity()
@@ -78,9 +81,9 @@ class GitHubService {
 
     fun getUserAgentHeader(): HttpHeaders {
         val headers = HttpHeaders()
-        headers.add("User-Agent", "YOUR_GH_NAME")
+        headers.add("User-Agent", apiConfiguration.agent)
         headers.add("Accept", "application/vnd.github+json")
-        headers.add("Authorization","YOUR_GH_TOKEN")
+        headers.add("Authorization",apiConfiguration.token)
         return headers
     }
 }

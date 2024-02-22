@@ -2,9 +2,9 @@ package org.example.userrepodetails.entity
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class Repository {
+data class Repository (
     @JsonProperty("Repository Name")
-    var rp_name: String? = null
+    val repoName: String,
     @JsonProperty("Branches")
-    var branches: List<Branch>? = null
-}
+    val branches: List<Branch>
+)

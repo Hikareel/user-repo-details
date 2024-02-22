@@ -2,9 +2,9 @@ package org.example.userrepodetails.entity
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class UserData {
+data class UserData (
     @JsonProperty("Owner Login")
-    var user_login: String? = null
+    val userLogin: String,
     @JsonProperty("Repos")
-    var repositories: List<Repository>? = null
-}
+    val repositories: List<Repository>
+)
