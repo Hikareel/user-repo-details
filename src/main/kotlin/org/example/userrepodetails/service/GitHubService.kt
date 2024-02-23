@@ -1,16 +1,15 @@
 package org.example.userrepodetails.service
 
-import org.example.userrepodetails.entity.git_api_json.RepoJson
 import com.google.gson.Gson
 import org.example.userrepodetails.config.ApiConfiguration
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import java.util.LinkedHashMap
 import kotlinx.coroutines.*
 import org.example.userrepodetails.entity.*
-import org.springframework.web.reactive.function.client.bodyToMono
+import org.example.userrepodetails.entity.git_api_json.branches.BranchJson
+import org.example.userrepodetails.entity.git_api_json.repos.RepoJson
 
 @Service
 class GitHubService(
@@ -18,14 +17,15 @@ class GitHubService(
     val gson: Gson
 ) {
     fun getUserData(username: String): String?  = runBlocking{
-//        val res = checkUserExists(username)
-//        if(res != null){
-//            return@runBlocking gson.toJson(res)
-//        }
+        val res = checkUserExists(username)
+        if(res != null){
+            return@runBlocking gson.toJson(res)
+        }
         return@runBlocking gson.toJson(UserData(
-            username,
-            getReposData(username)
-        ))
+                username,
+                getReposData(username)
+            )
+        )
     }
 
     suspend fun getReposData(
@@ -39,13 +39,12 @@ class GitHubService(
             .bodyToFlux(RepoJson::class.java)
             .collectList()
             .block()?.forEach{
-                println(it)
                 launch{
                     if (!it.fork){
                         repoList.add(
                             Repository(
-                                it.name
-//                                getRepoBranchesData(username, it.name!!)
+                                it.name,
+                                getRepoBranchesData(username, it.name)
                             )
                         )
                     }
@@ -59,20 +58,18 @@ class GitHubService(
         repoName: String
     ): List<Branch> = coroutineScope{
         val branchList: MutableList<Branch> = mutableListOf()
-        val response = WebClient.create().get()
+        WebClient.create().get()
             .uri("${apiConfiguration.url}/repos/$username/$repoName/branches")
             .headers { getUserAgentHeader() }
             .retrieve()
-            .bodyToMono(List::class.java)
-            .block()
-        response?.forEach {
+            .bodyToFlux(BranchJson::class.java)
+            .collectList()
+            .block()?.forEach {
             launch{
-                val responseMap = (it as LinkedHashMap<String, String>)
-                val commit = (responseMap["commit"] as LinkedHashMap<String, String>)
                 branchList.add(
                     Branch(
-                        responseMap["name"]!!,
-                        commit["sha"]!!
+                        it.name,
+                        it.commit.sha
                     )
                 )
             }
@@ -99,7 +96,6 @@ class GitHubService(
         headers.add("User-Agent", apiConfiguration.agent)
         headers.add("Accept", "application/vnd.github+git_api_json")
         headers.add("Authorization", apiConfiguration.token)
-        headers.add("X-GitHub-Api-Version", apiConfiguration.version)
         return headers
     }
 }

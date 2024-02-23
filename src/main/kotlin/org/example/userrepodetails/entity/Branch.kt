@@ -1,10 +1,10 @@
 package org.example.userrepodetails.entity
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
 
 data class Branch (
-    @JsonProperty("Branch Name")
+    @SerializedName("Branch Name")
     val branchName: String,
-    @JsonProperty("SHA")
+    @SerializedName("SHA")
     val lastCommitSha: String
 )

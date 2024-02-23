@@ -1,10 +1,10 @@
 package org.example.userrepodetails.entity
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
 
 data class UserData (
-    @JsonProperty("Owner Login")
+    @SerializedName("Owner Login")
     val userLogin: String,
-    @JsonProperty("Repos")
+    @SerializedName("Repos")
     val repositories: List<Repository>
 )
