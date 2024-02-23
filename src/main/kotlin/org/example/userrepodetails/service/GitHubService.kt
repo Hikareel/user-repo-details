@@ -1,5 +1,6 @@
 package org.example.userrepodetails.service
 
+import com.google.gson.Gson
 import org.example.userrepodetails.config.ApiConfiguration
 import org.example.userrepodetails.entity.Branch
 import org.example.userrepodetails.entity.Message
@@ -10,23 +11,27 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.util.LinkedHashMap
+import kotlinx.coroutines.*
 
 @Service
 class GitHubService(
-    val apiConfiguration: ApiConfiguration
+    val apiConfiguration: ApiConfiguration,
+    val gson: Gson
 ) {
-    fun getUserData(username: String): ResponseEntity<Any> {
+    fun getUserData(username: String): String?  = runBlocking{
         val res = checkUserExists(username)
         if(res != null){
-            return ResponseEntity.ok(res)
+            return@runBlocking gson.toJson(res)
         }
-        return ResponseEntity.ok(UserData(
+        return@runBlocking gson.toJson(UserData(
             username,
             getReposData(username)
         ))
     }
 
-    fun getReposData(username: String): List<Repository> {
+    suspend fun getReposData(
+        username: String
+    ): List<Repository> = coroutineScope{
         val repoList: MutableList<Repository> = mutableListOf()
         val response = WebClient.create().get()
             .uri("${apiConfiguration.url}/users/$username/repos")
@@ -35,18 +40,27 @@ class GitHubService(
             .bodyToMono(List::class.java)
             .block()
         response?.forEach{
-            val responseMap = (it as LinkedHashMap<String, String>)
-            if (responseMap["fork"].toString() == "false"){
-                repoList.add(Repository(
-                    responseMap["name"]!!,
-                    responseMap["name"]?.let { it1 -> getRepoBranchesData(username, it1) }!!
-                ))
+            launch{
+                val responseMap = (it as LinkedHashMap<String, String>)
+                if (responseMap["fork"].toString() == "false"){
+                    repoList.add(
+                        Repository(
+                            responseMap["name"]!!,
+                            responseMap["name"]?.let { it1 ->
+                                getRepoBranchesData(username, it1)
+                            }!!
+                        )
+                    )
+                }
             }
         }
-        return repoList
+        return@coroutineScope repoList
     }
 
-    fun getRepoBranchesData(username: String, repoName: String): List<Branch>{
+    suspend fun getRepoBranchesData(
+        username: String,
+        repoName: String
+    ): List<Branch> = coroutineScope{
         val branchList: MutableList<Branch> = mutableListOf()
         val response = WebClient.create().get()
             .uri("${apiConfiguration.url}/repos/$username/$repoName/branches")
@@ -55,14 +69,18 @@ class GitHubService(
             .bodyToMono(List::class.java)
             .block()
         response?.forEach {
-            val responseMap = (it as LinkedHashMap<String, String>)
-            val commit = (responseMap["commit"] as LinkedHashMap<String, String>)
-            branchList.add(Branch(
-                responseMap["name"]!!,
-                commit["sha"]!!
-            ))
+            launch{
+                val responseMap = (it as LinkedHashMap<String, String>)
+                val commit = (responseMap["commit"] as LinkedHashMap<String, String>)
+                branchList.add(
+                    Branch(
+                        responseMap["name"]!!,
+                        commit["sha"]!!
+                    )
+                )
+            }
         }
-        return branchList
+        return@coroutineScope branchList
     }
 
     fun checkUserExists(username: String): Message? {

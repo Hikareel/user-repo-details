@@ -1,5 +1,6 @@
 package org.example.userrepodetails.controller
 
+import org.example.userrepodetails.entity.UserData
 import org.example.userrepodetails.service.GitHubService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,7 +15,7 @@ class MainController(
 
     @GetMapping("/repos")
     @ResponseBody
-    fun repos(@RequestParam username: String): ResponseEntity<Any> {
+    fun repos(@RequestParam username: String): String? {
         return gitHubService.getUserData(username)
     }
 }
