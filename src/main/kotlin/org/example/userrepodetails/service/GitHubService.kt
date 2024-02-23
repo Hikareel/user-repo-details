@@ -13,7 +13,9 @@ import org.example.userrepodetails.entity.git_api_json.repos.RepoJson
 
 @Service
 class GitHubService(
-	val apiConfiguration: ApiConfiguration, val gson: Gson
+	val apiConfiguration: ApiConfiguration,
+	val webClient: WebClient,
+	val gson: Gson
 ) {
 	fun getUserData(username: String): String? = runBlocking {
 		val res = checkUserExists(username)
@@ -32,7 +34,7 @@ class GitHubService(
 		username: String
 	): List<Repository> = coroutineScope {
 		val repoList: MutableList<Repository> = mutableListOf()
-		WebClient.create().get()
+		webClient.get()
 			.uri("${apiConfiguration.url}/users/$username/repos")
 			.headers { getUserAgentHeader() }
 			.retrieve()
@@ -56,7 +58,7 @@ class GitHubService(
 		username: String, repoName: String
 	): List<Branch> = coroutineScope {
 		val branchList: MutableList<Branch> = mutableListOf()
-		WebClient.create().get()
+		webClient.get()
 			.uri("${apiConfiguration.url}/repos/$username/$repoName/branches")
 			.headers { getUserAgentHeader() }
 			.retrieve()
@@ -76,7 +78,7 @@ class GitHubService(
 
 	fun checkUserExists(username: String): Message? {
 		return try {
-			WebClient.create().get()
+			webClient.get()
 				.uri("${apiConfiguration.url}/users/$username")
 				.headers { getUserAgentHeader() }
 				.retrieve()
