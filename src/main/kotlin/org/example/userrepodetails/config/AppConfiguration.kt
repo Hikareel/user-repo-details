@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(ApiConfiguration::class)
 class AppConfiguration {
     @Bean
-    fun apiConfiguration(): ApiConfiguration{
+    fun apiConfiguration(): ApiConfiguration {
         return ApiConfiguration()
     }
 }

@@ -1,4 +1,5 @@
 git:
     url: "https://api.github.com"
     agent: "YOUR_GH_NAME"
+    accept: "application/vnd.github+git_api_json"
     token: "YOUR_GH_TOKEN"

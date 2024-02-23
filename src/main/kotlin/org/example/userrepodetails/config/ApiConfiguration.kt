@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class ApiConfiguration(
     var url: String? = "",
     var agent: String? = "",
+    var accept: String? = "",
     var token: String? = ""
 )
