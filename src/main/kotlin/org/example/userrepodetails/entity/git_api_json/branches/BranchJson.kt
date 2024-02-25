@@ -1,11 +1,11 @@
 package org.example.userrepodetails.entity.git_api_json.branches
 
-import com.google.gson.annotations.SerializedName
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class BranchJson(
-    @SerializedName("name") val name: String = "null",
-    @SerializedName("commit") val commit: Commit = Commit(),
-    @SerializedName("protected") val protected: Boolean = false,
-    @SerializedName("protection") val protection: Protection = Protection(),
-    @SerializedName("protection_url") val protection_url: String = "null",
+    @JsonProperty("name") val name: String = "null",
+    @JsonProperty("commit") val commit: Commit = Commit(),
+    @JsonProperty("protected") val protected: Boolean = false,
+    @JsonProperty("protection") val protection: Protection = Protection(),
+    @JsonProperty("protection_url") val protectionUrl: String = "null",
 )

@@ -1,10 +1,10 @@
 package org.example.userrepodetails.entity.git_api_json.branches
 
-import com.google.gson.annotations.SerializedName
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class RequiredStatusChecks(
-    @SerializedName("enforcement_level")
-    val enforcement_level: String = "null",
-    @SerializedName("contexts")
+    @JsonProperty("enforcement_level")
+    val enforcementLevel: String = "null",
+    @JsonProperty("contexts")
     val contexts: List<String> = mutableListOf()
 )

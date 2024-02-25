@@ -1,8 +1,8 @@
 package org.example.userrepodetails.entity.git_api_json.branches
 
-import com.google.gson.annotations.SerializedName
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Commit(
-	@SerializedName("sha") val sha: String = "null",
-	@SerializedName("url") val url: String = "null"
+	@JsonProperty("sha") val sha: String = "null",
+	@JsonProperty("url") val url: String = "null"
 )

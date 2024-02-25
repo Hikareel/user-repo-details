@@ -1,10 +1,9 @@
 package org.example.userrepodetails.entity.git_api_json.repos
 
-import com.google.gson.annotations.SerializedName
-
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Permissions(
-	@SerializedName("admin") val admin: Boolean = false,
-	@SerializedName("push") val push: Boolean = false,
-	@SerializedName("pull") val pull: Boolean = false
+	@JsonProperty("admin") val admin: Boolean = false,
+	@JsonProperty("push") val push: Boolean = false,
+	@JsonProperty("pull") val pull: Boolean = false
 )

@@ -13,9 +13,9 @@ import org.example.userrepodetails.entity.git_api_json.repos.RepoJson
 
 @Service
 class GitHubService(
-	val apiConfiguration: ApiConfiguration,
-	val webClient: WebClient,
-	val gson: Gson
+	private val apiConfiguration: ApiConfiguration,
+	private val webClient: WebClient,
+	private val gson: Gson
 ) {
 	fun getUserData(username: String): String? = runBlocking {
 		val res = checkUserExists(username)
@@ -45,7 +45,8 @@ class GitHubService(
 					if (!it.fork) {
 						repoList.add(
 							Repository(
-								it.name, getRepoBranchesData(username, it.name)
+								it.name,
+								getRepoBranchesData(username, it.name)
 							)
 						)
 					}
@@ -68,7 +69,8 @@ class GitHubService(
 				launch {
 					branchList.add(
 						Branch(
-							it.name, it.commit.sha
+							it.name,
+							it.commit.sha
 						)
 					)
 				}
