@@ -1,5 +1,5 @@
 git:
     url: "https://api.github.com"
-    agent: "Hikareel"
+    agent: "YOUR_GH_NAME"
     accept: "application/vnd.github+git_api_json"
-    token: "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"
+    token: "YOUR_GH_TOKEN"
